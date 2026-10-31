@@ -1,51 +1,43 @@
-# Mehman Management System
+# Mehman – Visitor Management System
 
-Mehman is a multi-tenant visitor, gate, guard, resident, office, and access management platform.
+**Mehman** is a digital Visitor Management System designed to simplify and secure visitor registration and access management for residential societies, apartments, offices, and organizations.
 
-## Stack
+It provides a centralized platform through a web-based CRM and a mobile application, allowing administrators, receptionists, and security personnel to manage visitor activities efficiently.
 
-- `backend`: Node.js, Express, Prisma, MySQL, JWT auth, QR pass services.
-- `frontend`: React/Vite web dashboard and landing page.
-- `mobile`: Expo/React Native Android app for guards, residents, offices, and admins.
+## Key Features
 
-## Production Hosting
+- **Visitor Registration:** Register and manage visitor details digitally.
+- **QR Code Gatepass:** Generate unique QR-code-based gatepasses for visitors.
+- **QR Code Scanning:** Verify visitor gatepasses using the mobile application.
+- **Entry and Exit Tracking:** Maintain records of visitor entry and exit activities.
+- **User Management:** Manage administrators, security guards, residents, and other authorized users.
+- **Branch and Society Management:** Manage multiple branches and residential communities.
+- **Dashboard and Analytics:** View visitor records and activity summaries.
+- **Notifications:** Keep relevant users informed about visitor activities.
 
-Use a public HTTPS API URL for both web and APK builds, for example:
+## Applications
 
-```txt
-https://api.yourdomain.com/api
-```
+- **Web CRM:** A centralized dashboard for managing visitors, gatepasses, users, and operations.
+- **Mobile Application:** Enables mobile access to visitor management and QR-code verification.
 
-Hostinger Cloud Startup can host the web build, Node backend, and MySQL database. Copy `backend/.env.hostinger.example` to `backend/.env` on the server and fill in the Hostinger MySQL credentials.
+## Technology Stack
 
-For a new MySQL database:
+| Component | Technology |
+|---|---|
+| Web Frontend | React.js, Vite |
+| Mobile Application | React Native, Expo |
+| Backend | Node.js, Express.js |
+| Database | MySQL |
+| ORM | Prisma |
+| Authentication | JWT, bcryptjs |
+| Validation | Zod |
+| QR Code Generation | qrcode |
+| State Management | Zustand |
 
-```bash
-npm install
-npm run prisma:generate
-npm run prisma:push
-npm run build
-npm run seed --workspace backend
-```
+## System Architecture
 
-Seed login:
+The web CRM and mobile application communicate with a common backend through REST APIs. The backend handles business logic, authentication, visitor management, QR-code verification, and database operations using MySQL.
 
-```txt
-superadmin@mehman.example
-Mehman@12345
-```
+## Project Objective
 
-## Build URLs
-
-Frontend production env:
-
-```env
-VITE_API_URL=https://api.yourdomain.com/api
-```
-
-Mobile production env:
-
-```env
-EXPO_PUBLIC_API_URL=https://api.yourdomain.com/api
-EXPO_PUBLIC_DEMO_MODE=false
-```
+The main objective of Mehman is to replace manual visitor registers and traditional gatepass processes with a centralized digital system that improves security, simplifies visitor management, and maintains accurate entry and exit records.
