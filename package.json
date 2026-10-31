@@ -1,0 +1,29 @@
+{
+  "name": "mehman-management-system",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Enterprise-grade multi-tenant visitor, gate, and access management SaaS for Mehman.",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace frontend",
+    "dev:backend": "npm run dev --workspace backend",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "postinstall": "npm run prisma:generate --workspace backend",
+    "start": "node index.js",
+    "build": "npm run build --workspace backend && npm run build --workspace frontend",
+    "qa:automation": "node scripts/qa-automation.mjs",
+    "lint": "npm run lint --workspace backend && npm run lint --workspace frontend",
+    "prisma:generate": "npm run prisma:generate --workspace backend",
+    "prisma:migrate": "npm run prisma:migrate --workspace backend",
+    "prisma:push": "npm run prisma:push --workspace backend",
+    "hostinger:prepare": "npm run build && npm run prisma:generate --workspace backend"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {}
+}

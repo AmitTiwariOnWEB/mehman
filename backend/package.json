@@ -1,0 +1,50 @@
+{
+  "name": "@mehman/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.js",
+    "start": "node dist/server.js",
+    "build": "node ../node_modules/typescript/bin/tsc -p tsconfig.json",
+    "lint": "eslint src --ext .js",
+    "prisma:generate": "node ../node_modules/prisma/build/index.js generate",
+    "prisma:migrate": "node ../node_modules/prisma/build/index.js migrate dev",
+    "prisma:push": "node ../node_modules/prisma/build/index.js db push",
+    "prisma:studio": "node ../node_modules/prisma/build/index.js studio",
+    "seed": "node ../node_modules/prisma/build/index.js db seed"
+  },
+  "dependencies": {
+    "@prisma/adapter-mariadb": "^6.19.3",
+    "@prisma/client": "^6.8.2",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "firebase-admin": "^13.10.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "prisma": "^6.19.3",
+    "qrcode": "^1.5.4",
+    "uuid": "^14.0.0",
+    "zod": "^3.24.4"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.15.18",
+    "@types/react": "~19.1.10",
+    "eslint": "^9.27.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,398 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleName {
+  SUPER_ADMIN
+  SOCIETY_ADMIN
+  SECURITY_GUARD
+  FLAT_OWNER
+  RECEPTIONIST
+}
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  SUSPENDED
+}
+
+enum GatepassStatus {
+  DRAFT
+  ACTIVE
+  CHECKED_IN
+  CHECKED_OUT
+  EXPIRED
+  CANCELLED
+  BLACKLISTED
+}
+
+enum EntryAction {
+  ENTRY
+  EXIT
+  DENIED
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  WHATSAPP
+  PUSH
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  READ
+  FAILED
+}
+
+model Company {
+  id            String              @id @default(uuid())
+  name          String
+  slug          String              @unique
+  domain        String?
+  logoUrl       String?
+  billingEmail  String?
+  isActive      Boolean             @default(true)
+  settings      Json                @default("{}")
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  branches      Branch[]
+  users         User[]
+  visitors      Visitor[]
+  vehicles      Vehicle[]
+  gatepasses    Gatepass[]
+  entryLogs     EntryLog[]
+  guards        Guard[]
+  flats         Flat[]
+  notifications Notification[]
+  operations    OperationalRecord[]
+  auditLogs     AuditLog[]
+
+  @@index([slug])
+}
+
+model Branch {
+  id         String              @id @default(uuid())
+  companyId  String
+  name       String
+  code       String
+  address    String
+  city       String?
+  state      String?
+  country    String              @default("India")
+  timezone   String              @default("Asia/Kolkata")
+  latitude   Decimal?
+  longitude  Decimal?
+  isActive   Boolean             @default(true)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  company    Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  users      User[]
+  visitors   Visitor[]
+  gatepasses Gatepass[]
+  entryLogs  EntryLog[]
+  guards     Guard[]
+  flats      Flat[]
+  operations OperationalRecord[]
+
+  @@unique([companyId, code])
+  @@index([companyId, isActive])
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        RoleName @unique
+  description String?
+  users       User[]
+}
+
+model User {
+  id              String              @id @default(uuid())
+  companyId       String?
+  branchId        String?
+  roleId          String
+  name            String
+  email           String              @unique
+  phone           String?
+  passwordHash        String
+  mustChangePassword  Boolean             @default(false)
+  status              UserStatus          @default(ACTIVE)
+  avatarUrl           String?
+  lastLoginAt         DateTime?
+  refreshTokens   RefreshToken[]
+  createdVisitors Visitor[]           @relation("VisitorCreatedBy")
+  approvedPasses  Gatepass[]          @relation("GatepassApprovedBy")
+  entryLogs       EntryLog[]          @relation("EntryLoggedBy")
+  notifications   Notification[]
+  deviceTokens    DeviceToken[]
+  operations      OperationalRecord[] @relation("OperationCreatedBy")
+  auditLogs       AuditLog[]
+  guardProfile    Guard?
+  ownedFlats      Flat[]              @relation("FlatOwner")
+  ownedFlats2     Flat[]              @relation("FlatOwner2")
+  phoneContacts   PhoneContact[]
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  company         Company?            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch          Branch?             @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  role            Role                @relation(fields: [roleId], references: [id])
+
+  @@index([companyId, branchId])
+  @@index([roleId])
+}
+
+model Guard {
+  id          String   @id @default(uuid())
+  companyId   String
+  branchId    String?
+  userId      String   @unique
+  badgeNumber String
+  shiftLabel  String?
+  isOnDuty    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch      Branch?  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, badgeNumber])
+  @@index([branchId, isOnDuty])
+}
+
+model Flat {
+  id         String   @id @default(uuid())
+  companyId  String
+  branchId   String?
+  ownerId    String?
+  owner2Id   String?
+  tower      String?
+  floor      String?
+  flatNumber String
+  intercom   String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch     Branch?  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  owner      User?    @relation("FlatOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  owner2     User?    @relation("FlatOwner2", fields: [owner2Id], references: [id], onDelete: SetNull)
+
+  @@unique([companyId, branchId, flatNumber])
+  @@index([companyId, ownerId])
+  @@index([companyId, owner2Id])
+}
+
+model PhoneContact {
+  id              String   @id @default(uuid())
+  userId          String
+  displayName     String
+  phone           String
+  normalizedPhone String
+  label           String?
+  rawId           String?
+  source          String   @default("PHONE_BOOK")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, normalizedPhone])
+  @@index([userId, displayName])
+}
+
+model Visitor {
+  id            String     @id @default(uuid())
+  companyId     String
+  branchId      String
+  createdById   String
+  fullName      String
+  phone         String
+  email         String?
+  organization  String?
+  purpose       String
+  photoUrl      String?
+  idType        String?
+  idNumberHash  String?
+  isBlacklisted Boolean    @default(false)
+  blacklistNote String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  company       Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch        Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  createdBy     User       @relation("VisitorCreatedBy", fields: [createdById], references: [id])
+  vehicles      Vehicle[]
+  gatepasses    Gatepass[]
+
+  @@index([companyId, phone])
+  @@index([branchId, createdAt])
+  @@index([isBlacklisted])
+}
+
+model Vehicle {
+  id         String     @id @default(uuid())
+  companyId  String
+  visitorId  String?
+  number     String
+  type       String?
+  color      String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  company    Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  visitor    Visitor?   @relation(fields: [visitorId], references: [id], onDelete: SetNull)
+  gatepasses Gatepass[]
+
+  @@unique([companyId, number])
+  @@index([visitorId])
+}
+
+model Gatepass {
+  id             String         @id @default(uuid())
+  companyId      String
+  branchId       String
+  visitorId      String
+  vehicleId      String?
+  approvedById   String?
+  passCode       String         @unique
+  qrTokenHash    String         @unique
+  qrPayload      Json
+  qrImageDataUrl String?
+  status         GatepassStatus @default(ACTIVE)
+  validFrom      DateTime       @default(now())
+  validUntil     DateTime
+  checkedInAt    DateTime?
+  checkedOutAt   DateTime?
+  maxEntries     Int            @default(1)
+  entryCount     Int            @default(0)
+  metadata       Json           @default("{}")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  company        Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch         Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  visitor        Visitor        @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  vehicle        Vehicle?       @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  approvedBy     User?          @relation("GatepassApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  entryLogs      EntryLog[]
+
+  @@index([companyId, branchId, status])
+  @@index([visitorId, createdAt])
+  @@index([validUntil])
+}
+
+model EntryLog {
+  id         String      @id @default(uuid())
+  companyId  String
+  branchId   String
+  gatepassId String
+  loggedById String
+  action     EntryAction
+  occurredAt DateTime    @default(now())
+  deviceId   String?
+  location   String?
+  remarks    String?
+  snapshot   Json        @default("{}")
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch     Branch      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  gatepass   Gatepass    @relation(fields: [gatepassId], references: [id], onDelete: Cascade)
+  loggedBy   User        @relation("EntryLoggedBy", fields: [loggedById], references: [id])
+
+  @@index([companyId, branchId, occurredAt])
+  @@index([gatepassId, action])
+}
+
+model Notification {
+  id        String              @id @default(uuid())
+  companyId String
+  userId    String?
+  channel   NotificationChannel @default(IN_APP)
+  status    NotificationStatus  @default(QUEUED)
+  title     String
+  body      String
+  data      Json                @default("{}")
+  readAt    DateTime?
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  company   Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user      User?               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status, createdAt])
+  @@index([userId, readAt])
+}
+
+model DeviceToken {
+  id                String   @id @default(uuid())
+  userId            String
+  token             String   @unique
+  platform          String?
+  deviceId          String?
+  oneSignalPlayerId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model OperationalRecord {
+  id           String    @id @default(uuid())
+  companyId    String
+  branchId     String?
+  createdById  String
+  assignedToId String?
+  category     String
+  title        String
+  description  String?
+  status       String    @default("OPEN")
+  priority     String    @default("NORMAL")
+  payload      Json      @default("{}")
+  attachments  Json      @default("[]")
+  dueAt        DateTime?
+  resolvedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  company      Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch       Branch?   @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  createdBy    User      @relation("OperationCreatedBy", fields: [createdById], references: [id])
+
+  @@index([companyId, category, status])
+  @@index([branchId, createdAt])
+  @@index([createdById, createdAt])
+  @@index([assignedToId, status])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  companyId  String?
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now())
+  company    Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId])
+}

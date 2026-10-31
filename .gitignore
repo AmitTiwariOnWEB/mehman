@@ -1,0 +1,101 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment files and secrets
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!.env*.example
+!**/.env.example
+!**/.env*.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+coverage/
+**/dist/
+**/build/
+**/coverage/
+
+# Expo / React Native / Metro
+.expo/
+**/.expo/
+.turbo/
+**/.turbo/
+.metro-health-check*
+
+# Android generated files
+**/.gradle/
+**/.cxx/
+**/.kotlin/
+mobile/android/app/build/
+mobile/android/build/
+mobile/android/.gradle/
+mobile/android/.kotlin/
+mobile/android/app/.cxx/
+
+# Android signing secrets
+*.jks
+*.keystore
+*.p12
+*.p8
+*.mobileprovision
+keystore.properties
+**/keystore.properties
+mobile/android/app/debug.keystore
+
+# App binaries and generated artifacts
+*.apk
+*.aab
+*.ipa
+*.apks
+*.idsig
+
+# Local editor / OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/settings.json
+.idea/
+
+# Local assistant/tooling state
+.claude/
+
+# Temporary screenshots and generated previews
+landing-page-images/
+frontend/landing-*.png
+frontend/landing-*.log
+mobile/dist-check*/
+mobile/dist-web-screenshot-check/
+
+# Prisma local generated temp files
+node_modules/.prisma/
+
+# Keep mobile app source local-only for APK generation.
+# AdminScreen is intentionally unignored because the app now imports it.
+mobile/
+!mobile/
+mobile/*
+!mobile/src/
+mobile/src/*
+!mobile/src/screens/
+!mobile/src/components/
+mobile/src/screens/*
+!mobile/src/screens/AdminScreen.js
+mobile/src/components/*
+!mobile/src/components/ChangePasswordModal.js
+
+backend/mehman-7f9f2-firebase-adminsdk-fbsvc-a2f455b2b4.json
+backend/*firebase-adminsdk*.json
+.env.hostinger.import
